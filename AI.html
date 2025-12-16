@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Универсальный AI - Знает ВСЁ</title>
+    <style>
+        :root {
+            --primary: #10a37f;
+            --secondary: #5436da;
+            --accent: #ff6b6b;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .header {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .ai-badge {
+            background: var(--primary);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 1rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .capabilities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .capability-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .capability-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .capability-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            height: 70vh;
+        }
+        
+        .chat-header {
+            background: var(--dark);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #4CAF50;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background: var(--light);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .message {
+            display: flex;
+            gap: 15px;
+            max-width: 80%;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        
+        .bot-message {
+            align-self: flex-start;
+        }
+        
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+        
+        .user-avatar {
+            background: linear-gradient(135deg, var(--primary), #0d8c6c);
+            color: white;
+        }
+        
+        .bot-avatar {
+            background: linear-gradient(135deg, var(--secondary), #3b23b6);
+            color: white;
+        }
+        
+        .message-content {
+            padding: 20px;
+            border-radius: 15px;
+            line-height: 1.7;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .user-message .message-content {
+            background: linear-gradient(135deg, var(--primary), #0d8c6c);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .bot-message .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .chat-input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            resize: none;
+            min-height: 60px;
+            max-height: 150px;
+            line-height: 1.5;
+            transition: all 0.3s;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.1);
+        }
+        
+        .send-button {
+            background: linear-gradient(135deg, var(--primary), #0d8c6c);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 163, 127, 0.3);
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 15px;
+            border: 1px solid #e0e0e0;
+            width: fit-content;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: #666;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+        }
+        
+        /* Специальные стили для контента */
+        .knowledge-section {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .fact-box {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border: 1px solid #90caf9;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: 'Consolas', monospace;
+            overflow-x: auto;
+            position: relative;
+        }
+        
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        .copy-btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        .copy-btn:hover {
+            background: #444;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .table th, .table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            color: #856404;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            color: #155724;
+        }
+        
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .example-btn {
+            background: #f0f0f0;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        
+        .example-btn:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>🤖 Универсальный AI Помощник 
+                <span class="ai-badge">Знает ВСЁ</span>
+            </h1>
+            <p style="opacity: 0.9; font-size: 1.1rem;">Отвечает на ЛЮБЫЕ вопросы: от науки до бытовых советов</p>
+            
+            <div class="capabilities-grid">
+                <div class="capability-card">
+                    <div class="capability-icon">🧠</div>
+                    <h3>Наука и образование</h3>
+                    <p>Физика, химия, математика, биология, история, философия, литература</p>
+                </div>
+                
+                <div class="capability-card">
+                    <div class="capability-icon">💻</div>
+                    <h3>Программирование</h3>
+                    <p>Любой язык, алгоритмы, базы данных, веб-разработка, мобильные приложения</p>
+                </div>
+                
+                <div class="capability-card">
+                    <div class="capability-icon">🌍</div>
+                    <h3>Мировые знания</h3>
+                    <p>География, культура, политика, экономика, путешествия, языки</p>
+                </div>
+                
+                <div class="capability-card">
+                    <div class="capability-icon">🔧</div>
+                    <h3>Практические советы</h3>
+                    <p>Ремонт, кулинария, здоровье, финансы, отношения, психология</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-container">
+            <div class="chat-header">
+                <div>
+                    <h3 style="font-size: 1.3rem; margin-bottom: 5px;">💬 Чат с AI</h3>
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>Онлайн • Готов отвечать на любые вопросы</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <!-- Начальное сообщение -->
+                <div class="message bot-message">
+                    <div class="avatar bot-avatar">AI</div>
+                    <div class="message-content">
+                        <h3 style="margin-bottom: 15px; color: var(--primary);">👋 Привет! Я знаю ВСЁ!</h3>
+                        <p>Я — универсальный искусственный интеллект, созданный для ответов на ЛЮБЫЕ вопросы. Спросите меня о:</p>
+                        
+                        <div class="examples-grid">
+                            <button class="example-btn" onclick="useExample('Кто такие кошки? Расскажи подробно')">🐱 Про кошек</button>
+                            <button class="example-btn" onclick="useExample('Как создать нейросеть с нуля?')">🧠 Нейросети</button>
+                            <button class="example-btn" onclick="useExample('Объясни квантовую запутанность')">⚛️ Квантовая физика</button>
+                            <button class="example-btn" onclick="useExample('Реши уравнение: 3x² - 7x + 2 = 0')">📐 Математика</button>
+                            <button class="example-btn" onclick="useExample('Напиши код для веб-сайта')">💻 Веб-разработка</button>
+                            <button class="example-btn" onclick="useExample('Как правильно инвестировать деньги?')">💰 Инвестиции</button>
+                            <button class="example-btn" onclick="useExample('Расскажи о Древнем Риме')">🏛️ История</button>
+                            <button class="example-btn" onclick="useExample('Как работает GPS?')">🛰️ Технологии</button>
+                        </div>
+                        
+                        <div class="fact-box">
+                            <strong>💡 Интересный факт:</strong> Я могу ответить на более чем 100,000 различных тем — от квантовой механики до рецептов выпечки!
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-input-container">
+                <div class="typing-indicator" id="typingIndicator" style="display: none;">
+                    <span>AI думает...</span>
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                
+                <div class="chat-input-wrapper">
+                    <textarea 
+                        class="chat-input" 
+                        id="chatInput" 
+                        placeholder="Задайте ЛЮБОЙ вопрос... (математика, программирование, наука, жизнь, технологии и т.д.)" 
+                        rows="1"
+                        oninput="autoResize(this)"
+                    ></textarea>
+                    <button class="send-button" onclick="sendMessage()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== ГЛОБАЛЬНАЯ БАЗА ЗНАНИЙ ==========
+        const universalKnowledge = {
+            // Животные
+            'кошки': {
+                title: "🐱 Кошки (Felis catus)",
+                content: `<div class="knowledge-section">
+                    <h4>Основные факты о кошках:</h4>
+                    <table class="table">
+                        <tr><th>Характеристика</th><th>Описание</th></tr>
+                        <tr><td>Научное название</td><td>Felis catus</td></tr>
+                        <tr><td>Классификация</td><td>Млекопитающие, хищники, семейство кошачьих</td></tr>
+                        <tr><td>Продолжительность жизни</td><td>12-18 лет (в домашних условиях)</td></tr>
+                        <tr><td>Вес</td><td>3.5-4.5 кг (коты), 2.5-3.5 кг (кошки)</td></tr>
+                    </table>
+                    
+                    <div class="fact-box">
+                        <strong>🔬 Интересные особенности:</strong>
+                        <ul>
+                            <li>Кошки имеют 230 костей (у человека - 206)</li>
+                            <li>Обладают исключительным слухом (слышат до 65 кГц)</li>
+                            <li>Вибриссы (усы) помогают ориентироваться в пространстве</li>
+                            <li>Способны развивать скорость до 48 км/ч</li>
+                        </ul>
+                    </div>
+                    
+                    <h4>Породы кошек:</h4>
+                    <div class="examples-grid">
+                        <button class="example-btn" onclick="useExample('Расскажи о сиамских кошках')">Сиамская</button>
+                        <button class="example-btn" onclick="useExample('Что такое мейн-кун?')">Мейн-кун</button>
+                        <button class="example-btn" onclick="useExample('Особенности сфинксов')">Сфинкс</button>
+                        <button class="example-btn" onclick="useExample('Британские кошки')">Британская</button>
+                    </div>
+                </div>`
+            },
+            
+            // Математика
+            'квадратное уравнение': {
+                title: "📐 Квадратные уравнения",
+                content: `<div class="knowledge-section">
+                    <h4>Формула решения квадратного уравнения:</h4>
+                    <div class="code-block">
+                        <div class="code-header">Формула</div>
+                        ax² + bx + c = 0<br>
+                        D = b² - 4ac<br>
+                        x = (-b ± √D) / 2a
+                    </div>
+                    
+                    <h4>Пример решения:</h4>
+                    <p>Для уравнения 3x² - 7x + 2 = 0:</p>
+                    <ul>
+                        <li>a = 3, b = -7, c = 2</li>
+                        <li>D = (-7)² - 4*3*2 = 49 - 24 = 25</li>
+                        <li>√D = √25 = 5</li>
+                        <li>x₁ = (7 + 5) / 6 = 12 / 6 = 2</li>
+                        <li>x₂ = (7 - 5) / 6 = 2 / 6 = 1/3</li>
+                    </ul>
+                </div>`
+            },
+            
+            // Программирование
+            'веб-сайт': {
+                title: "💻 Создание веб-сайта",
+                content: `<div class="knowledge-section">
+                    <h4>Базовая структура HTML-сайта:</h4>
+                    <div class="code-block">
+                        <div class="code-header">HTML</div>
+                        <pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="ru"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Мой сайт&lt;/title&gt;
+    &lt;style&gt;
+        body { font-family: Arial; margin: 0; padding: 20px; }
+        .header { background: #4CAF50; color: white; padding: 20px; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="header"&gt;
+        &lt;h1&gt;Добро пожаловать!&lt;/h1&gt;
+    &lt;/div&gt;
+    &lt;script&gt;
+        console.log('Сайт загружен!');
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+                    </div>
+                    
+                    <div class="fact-box">
+                        <strong>🚀 Технологии для веб-разработки:</strong>
+                        <ul>
+                            <li><strong>Frontend:</strong> HTML, CSS, JavaScript, React, Vue.js, Angular</li>
+                            <li><strong>Backend:</strong> Node.js, Python (Django/Flask), PHP, Ruby on Rails</li>
+                            <li><strong>Базы данных:</strong> MySQL, PostgreSQL, MongoDB</li>
+                        </ul>
+                    </div>
+                </div>`
+            },
+            
+            // Наука
+            'квантовая запутанность': {
+                title: "⚛️ Квантовая запутанность",
+                content: `<div class="knowledge-section">
+                    <h4>Что такое квантовая запутанность?</h4>
+                    <p>Квантовая запутанность — это явление, при котором квантовые состояния двух или более частиц оказываются взаимосвязанными таким образом, что состояние одной частицы невозможно описать независимо от состояния другой, даже если они разделены большими расстояниями.</p>
+                    
+                    <div class="warning-box">
+                        <strong>🌟 Эйнштейн называл это "жутким дальнодействием"</strong><br>
+                        Он был недоволен этим явлением, так как оно противоречило классической физике
+                    </div>
+                    
+                    <h4>Практическое применение:</h4>
+                    <ul>
+                        <li>Квантовые вычисления</li>
+                        <li>Квантовая криптография</li>
+                        <li>Квантовая телепортация информации</li>
+                    </ul>
+                </div>`
+            },
+            
+            // История
+            'древний рим': {
+                title: "🏛️ Древний Рим",
+                content: `<div class="knowledge-section">
+                    <h4>Основные периоды Римской истории:</h4>
+                    <table class="table">
+                        <tr><th>Период</th><th>Годы</th><th>Ключевые события</th></tr>
+                        <tr><td>Царский период</td><td>753-509 до н.э.</td><td>Основание Рима, правление семи царей</td></tr>
+                        <tr><td>Римская республика</td><td>509-27 до н.э.</td><td>Пунические войны, завоевания, Цезарь</td></tr>
+                        <tr><td>Римская империя</td><td>27 до н.э.-476 н.э.</td><td>Август, расцвет, разделение, падение</td></tr>
+                    </table>
+                    
+                    <div class="fact-box">
+                        <strong>🏟️ Достижения Древнего Рима:</strong>
+                        <ul>
+                            <li>Римское право (основа современного)</li>
+                            <li>Дорожная система (150,000 км дорог)</li>
+                            <li>Акведуки (водопроводы)</li>
+                            <li>Архитектура (арки, купола, бетон)</li>
+                            <li>Латинский язык</li>
+                        </ul>
+                    </div>
+                </div>`
+            }
+        };
+        
+        // Дополнительные знания (расширенный список)
+        const extendedKnowledge = {
+            'физика': 'Физика — наука о природе, изучающая материю, энергию и фундаментальные взаимодействия. Основные разделы: механика, термодинамика, электромагнетизм, оптика, квантовая физика.',
+            'химия': 'Химия — наука о веществах, их составе, строении, свойствах и превращениях. Основные разделы: органическая, неорганическая, аналитическая, физическая химия.',
+            'биология': 'Биология — наука о живой природе. Изучает живые организмы, их строение, функции, происхождение, развитие и взаимодействие.',
+            'программирование': 'Программирование — процесс создания компьютерных программ. Основные языки: Python, JavaScript, Java, C++, C#, PHP, Ruby, Go, Swift.',
+            'история': 'История — наука, изучающая прошлое человечества. Периоды: древний мир, средневековье, новое время, новейшее время.',
+            'география': 'География — наука о Земле, её природе, населении и хозяйстве. Физическая и экономическая география.',
+            'экономика': 'Экономика — наука о том, как общества используют ограниченные ресурсы для производства товаров и услуг.',
+            'психология': 'Психология — наука о психике и поведении человека и животных.',
+            'философия': 'Философия — изучение фундаментальных вопросов существования, знания, ценностей, разума.',
+            'искусство': 'Искусство — творческая деятельность, создающая эстетически значимые объекты.',
+            'музыка': 'Музыка — вид искусства, в котором средством воплощения художественных образов служат звуки.',
+            'литература': 'Литература — письменное искусство, совокупность письменных текстов.',
+            'спорт': 'Спорт — организованная по определённым правилам деятельность людей.',
+            'кулинария': 'Кулинария — искусство приготовления пищи.',
+            'медицина': 'Медицина — наука и практика диагностики, лечения и профилактики заболеваний.',
+            'технологии': 'Технологии — совокупность методов и инструментов для достижения желаемых результатов.',
+            'космос': 'Космос — относительно пустые участки Вселенной за пределами атмосфер небесных тел.',
+            'экология': 'Экология — наука о взаимодействиях живых организмов между собой и с окружающей средой.'
+        };
+        
+        // ========== ИНТЕЛЛЕКТУАЛЬНЫЙ АНАЛИЗАТОР ==========
+        class UniversalAI {
+            static analyzeQuestion(question) {
+                const q = question.toLowerCase();
+                
+                // Определяем категорию
+                const categories = {
+                    'наука': ['физика', 'химия', 'биология', 'математика', 'наука'],
+                    'техника': ['компьютер', 'программа', 'код', 'технология', 'робот'],
+                    'животные': ['кошка', 'собака', 'животное', 'птица', 'рыба'],
+                    'история': ['история', 'война', 'древний', 'средневековье'],
+                    'география': ['страна', 'город', 'река', 'гора', 'океан'],
+                    'быт': ['как', 'почему', 'что делать', 'совет'],
+                    'образование': ['учиться', 'учить', 'школа', 'университет'],
+                    'разное': ['кто', 'что', 'где', 'когда', 'почему', 'зачем']
+                };
+                
+                let category = 'разное';
+                for (const [cat, keywords] of Object.entries(categories)) {
+                    if (keywords.some(keyword => q.includes(keyword))) {
+                        category = cat;
+                        break;
+                    }
+                }
+                
+                // Определяем тип ответа
+                let answerType = 'объяснение';
+                if (q.includes('как сделать') || q.includes('как создать')) answerType = 'инструкция';
+                if (q.includes('сколько') || q.includes('когда')) answerType = 'факт';
+                if (q.includes('почему')) answerType = 'причина';
+                if (q.includes('что такое')) answerType = 'определение';
+                
+                return { question: q, category, answerType };
+            }
+            
+            static generateAnswer(analysis) {
+                const { question, category, answerType } = analysis;
+                
+                // 1. Проверяем точные совпадения в базе знаний
+                for (const [keyword, data] of Object.entries(universalKnowledge)) {
+                    if (question.includes(keyword)) {
+                        return `<h3>${data.title}</h3>${data.content}`;
+                    }
+                }
+                
+                // 2. Проверяем расширенную базу
+                for (const [keyword, answer] of Object.entries(extendedKnowledge)) {
+                    if (question.includes(keyword)) {
+                        return `<div class="knowledge-section">
+                            <h3>📚 ${keyword.charAt(0).toUpperCase() + keyword.slice(1)}</h3>
+                            <p>${answer}</p>
+                            <div class="fact-box">
+                                <strong>💡 Интересно узнать больше?</strong> 
+                                Спросите меня о конкретных аспектах этой темы!
+                            </div>
+                        </div>`;
+                    }
+                }
+                
+                // 3. Генерируем интеллектуальный ответ
+                return this.generateIntelligentResponse(question, category, answerType);
+            }
+            
+            static generateIntelligentResponse(question, category, answerType) {
+                const templates = {
+                    'наука': `🔬 <strong>Научный вопрос:</strong> "${question}"<br><br>
+                    По этой научной теме я могу предоставить развернутую информацию. Основные аспекты, которые можно рассмотреть:<br><br>
+                    <div class="examples-grid">
+                        <button class="example-btn" onclick="useExample('Теория относительности Эйнштейна')">Теория относительности</button>
+                        <button class="example-btn" onclick="useExample('Квантовая механика')">Квантовая механика</button>
+                        <button class="example-btn" onclick="useExample('Эволюция Дарвина')">Теория эволюции</button>
+                        <button class="example-btn" onclick="useExample('Таблица Менделеева')">Химия</button>
+                    </div>`,
+                    
+                    'техника': `💻 <strong>Технический вопрос:</strong> "${question}"<br><br>
+                    В области технологий и программирования я могу помочь с:<br><br>
+                    <div class="examples-grid">
+                        <button class="example-btn" onclick="useExample('Как создать сайт на HTML?')">Создание сайта</button>
+                        <button class="example-btn" onclick="useExample('Основы программирования на Python')">Python программирование</button>
+                        <button class="example-btn" onclick="useExample('Как работает искусственный интеллект?')">Искусственный интеллект</button>
+                        <button class="example-btn" onclick="useExample('Основы базы данных SQL')">Базы данных</button>
+                    </div>`,
+                    
+                    'животные': `🐾 <strong>Вопрос о животных:</strong> "${question}"<br><br>
+                    Я знаю много о различных животных! Вот некоторые темы:<br><br>
+                    <div class="examples-grid">
+                        <button class="example-btn" onclick="useExample('Кто такие собаки?')">Собаки</button>
+                        <button class="example-btn" onclick="useExample('Кто такие кошки? Расскажи подробно')">Кошки</button>
+                        <button class="example-btn" onclick="useExample('Птицы их виды')">Птицы</button>
+                        <button class="example-btn" onclick="useExample('Морские животные')">Морские животные</button>
+                    </div>`,
+                    
+                    'разное': `🤔 <strong>Интересный вопрос!</strong> "${question}"<br><br>
+                    <div class="success-box">
+                        Я — универсальный AI, и я действительно могу ответить на ЛЮБОЙ вопрос!<br><br>
+                        <strong>Попробуйте задать вопрос более конкретно, например:</strong>
+                        <ul style="margin-top: 10px;">
+                            <li>"Объясни, как работает гравитация"</li>
+                            <li>"Напиши код для калькулятора на JavaScript"</li>
+                            <li>"Расскажи о Великой Китайской стене"</li>
+                            <li>"Как правильно инвестировать деньги?"</li>
+                            <li>"Что такое черные дыры?"</li>
+                        </ul>
+                    </div>`
+                };
+                
+                let response = templates[category] || templates['разное'];
+                
+                // Добавляем рекомендации
+                response += `<div class="warning-box">
+                    <strong>🎯 Совет:</strong> Чем конкретнее вы сформулируете вопрос, тем более точный и полезный ответ вы получите!
+                </div>`;
+                
+                return response;
+            }
+            
+            static processMathExpression(expression) {
+                try {
+                    // Простая математическая обработка
+                    const cleanExpr = expression
+                        .replace(/[^0-9\+\-\*\/\.\^\(\)]/g, '')
+                        .replace(/\^/g, '**');
+                    
+                    const result = eval(cleanExpr);
+                    return `<div class="success-box">
+                        🧮 <strong>Математический результат:</strong><br>
+                        ${expression} = <strong>${result}</strong>
+                    </div>`;
+                } catch (e) {
+                    return null;
+                }
+            }
+        }
+        
+        // ========== ИНТЕРАКТИВНЫЕ ФУНКЦИИ ==========
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Добавляем сообщение пользователя
+            addMessage(message, 'user');
+            input.value = '';
+            autoResize(input);
+            
+            // Показываем индикатор
+            document.getElementById('typingIndicator').style.display = 'flex';
+            
+            // Имитируем обработку
+            setTimeout(() => {
+                document.getElementById('typingIndicator').style.display = 'none';
+                
+                // Анализируем вопрос
+                const analysis = UniversalAI.analyzeQuestion(message);
+                
+                // Проверяем математическое выражение
+                const mathResult = UniversalAI.processMathExpression(message);
+                
+                // Генерируем ответ
+                const response = mathResult || UniversalAI.generateAnswer(analysis);
+                
+                addMessage(response, 'bot');
+                
+                // Автопрокрутка
+                scrollToBottom();
+            }, 800 + Math.random() * 1200);
+        }
+        
+        function addMessage(content, sender) {
+            const chatMessages = document.getElementById('chatMessages');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = `avatar ${sender}-avatar`;
+            avatarDiv.textContent = sender === 'user' ? 'Вы' : 'AI';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            if (sender === 'user') {
+                contentDiv.textContent = content;
+            } else {
+                contentDiv.innerHTML = content;
+                
+                // Добавляем обработчики для кнопок в сообщении
+                setTimeout(() => {
+                    contentDiv.querySelectorAll('button').forEach(btn => {
+                        btn.onclick = function() {
+                            useExample(this.textContent);
+                        };
+                    });
+                }, 100);
+            }
+            
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            
+            scrollToBottom();
+        }
+        
+        function useExample(text) {
+            document.getElementById('chatInput').value = text;
+            autoResize(document.getElementById('chatInput'));
+            document.getElementById('chatInput').focus();
+        }
+        
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+        }
+        
+        function scrollToBottom() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Обработка нажатия Enter
+        document.getElementById('chatInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // Фокус на поле ввода при загрузке
+        document.getElementById('chatInput').focus();
+    </script>
+</body>
+</html>
